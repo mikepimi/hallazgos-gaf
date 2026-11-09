@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Hallazgos de auditoría GAF</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: una diapositiva a la vez. Barra de control arriba; escenario de 1180 px que se apila en una columna en el celular. */
+:root{
+  --bg:#EEF3F0; --surface:#FBFDFC; --ink:#12231D; --muted:#4A5C55; --line:#D3DDD8;
+  --green:#1F5D4C; --green-soft:#DCEAE3; --sand:#B86F1C; --sand-ink:#8A520F; --sand-wash:#F8ECDC;
+  --blue:#8DB2CF; --blue-ink:#2D5B7E; --on-accent:#FBFDFC;
+  --f-display:'Bricolage Grotesque','Trebuchet MS',sans-serif;
+  --f-body:'IBM Plex Sans','Segoe UI',Arial,sans-serif;
+  --f-mono:'IBM Plex Mono',Consolas,'Courier New',monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1814; --surface:#14231E; --ink:#E4EEE9; --muted:#9FB3AB; --line:#29403A;
+    --green:#56AE8D; --green-soft:#1C3A31; --sand:#E09A46; --sand-ink:#F1BC79; --sand-wash:#2C2216;
+    --blue:#3E6D92; --blue-ink:#9CC3E2; --on-accent:#0D1814; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1814; --surface:#14231E; --ink:#E4EEE9; --muted:#9FB3AB; --line:#29403A;
+  --green:#56AE8D; --green-soft:#1C3A31; --sand:#E09A46; --sand-ink:#F1BC79; --sand-wash:#2C2216;
+  --blue:#3E6D92; --blue-ink:#9CC3E2; --on-accent:#0D1814; color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sand);outline-offset:2px}
+
+.app{height:100%;display:grid;grid-template-rows:auto 1fr}
+.bar{position:relative;display:flex;align-items:center;gap:10px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line);z-index:5}
+.brand{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.brand b{color:var(--ink);font-weight:500}
+.count{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.nav{padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;white-space:nowrap}
+.nav:hover{border-color:var(--green)}
+.nav.primary{background:var(--green);border-color:var(--green);color:var(--on-accent)}
+.nav:disabled{opacity:.4;cursor:default}
+.progress{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:var(--green);transition:width .3s ease}
+.menu{position:absolute;top:calc(100% + 6px);right:max(16px,env(safe-area-inset-right,0px));width:min(340px,calc(100vw - 32px));max-height:70vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.18)}
+.menu button{display:flex;gap:10px;width:100%;text-align:left;padding:9px 10px;border:0;border-radius:6px;background:none;cursor:pointer}
+.menu button:hover{background:var(--green-soft)}
+.menu button[aria-current="true"]{background:var(--green-soft);font-weight:600}
+.menu .k{font-family:var(--f-mono);font-size:13px;color:var(--muted);min-width:2ch;text-align:right;padding-top:2px}
+
+main{overflow:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.slide{max-width:1180px;margin-inline:auto;padding-block:clamp(24px,5vh,56px) 56px;display:flex;flex-direction:column;gap:28px;animation:enter .35s ease}
+@keyframes enter{from{opacity:.35;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide{animation:none}.progress,.seg,.b,.hb{transition:none!important}}
+
+.eyebrow{font-family:var(--f-mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin:0}
+h1,h2{font-family:var(--f-display);font-weight:700;letter-spacing:-.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(34px,5.2vw,62px);line-height:1.06}
+h2{font-size:clamp(28px,3.6vw,44px);line-height:1.1}
+h3{font-size:18px;line-height:1.3;margin:0;font-weight:600}
+p{margin:0}
+.head{display:flex;flex-direction:column;gap:10px}
+.lead{font-size:19px;color:var(--muted);max-width:65ch}
+.note{font-size:15px;color:var(--muted);max-width:70ch}
+.code{font-family:var(--f-mono);font-size:.9em;white-space:nowrap}
+
+.cols-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.cols-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.split{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.cols-3,.cols-4{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}}
+@media (max-width:520px){.cols-3,.cols-4{grid-template-columns:1fr}}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.pick{cursor:pointer;text-align:left;transition:border-color .15s}
+.pick:hover{border-color:var(--green)}
+.pick[aria-pressed="true"]{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.big{font-family:var(--f-display);font-weight:700;font-size:clamp(34px,4vw,48px);line-height:1;color:var(--green);font-variant-numeric:tabular-nums}
+.big.sand{color:var(--sand-ink)}
+.tap{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+.mine{background:var(--sand-wash);border-radius:10px;padding:18px 22px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mine .lab{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--sand-ink)}
+.mine p{font-size:18px;line-height:1.55;max-width:80ch}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel .scroll{max-height:360px;overflow:auto;padding-right:4px}
+
+/* Gráfica de columnas */
+.colchart{display:flex;align-items:flex-end;gap:clamp(6px,1.4vw,16px);height:320px}
+.col{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;background:none;border:0;padding:0;cursor:pointer}
+.col .v{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.col .b{width:100%;max-width:64px;background:var(--green);border-radius:4px 4px 0 0;transition:height .3s ease,background .2s}
+.col .y{width:100%;text-align:center;border-top:1px solid var(--line);padding-top:6px;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.col:hover .b{background:color-mix(in srgb,var(--green) 75%,var(--sand))}
+.col[aria-pressed="true"] .b{background:var(--sand)}
+.col[aria-pressed="true"] .v,.col[aria-pressed="true"] .y{color:var(--sand-ink);font-weight:600}
+
+/* Barra apilada */
+.stack{display:flex;height:48px;gap:3px;border-radius:8px;overflow:hidden}
+.seg{min-width:0;transition:flex-grow .35s ease}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* Barras horizontales */
+.hbars{display:flex;flex-direction:column;gap:4px}
+.hrow{display:grid;grid-template-columns:minmax(0,15em) minmax(0,1fr) 3ch;gap:12px;align-items:center;padding:7px 8px;border-radius:6px;border:0;background:none;text-align:left;width:100%}
+button.hrow{cursor:pointer}
+button.hrow:hover,.hrow[aria-pressed="true"]{background:var(--green-soft)}
+.hl{font-size:15px;line-height:1.3;min-width:0}
+.track{display:block;height:14px}
+.hb{display:block;height:100%;background:var(--green);border-radius:0 3px 3px 0;transition:width .3s ease}
+.hrow[aria-pressed="true"] .hb{background:var(--sand)}
+.hn{font-family:var(--f-mono);font-size:14px;text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.hrow{grid-template-columns:minmax(0,1fr) 3ch;row-gap:4px}.hrow .hl{grid-column:1/-1}}
+
+/* Chips y controles */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--f-mono);font-size:14px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);cursor:pointer}
+.chip:hover{border-color:var(--green)}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--on-accent)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;line-height:1.4;padding:1px 9px;border-radius:999px;border:1px solid var(--line);white-space:nowrap;background:var(--surface)}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.rlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.rlist li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.rlist li:last-child{border-bottom:0}
+.rlist .meta{font-size:14px;color:var(--muted)}
+
+/* Puntos */
+.dots{display:grid;grid-template-columns:repeat(auto-fill,minmax(24px,1fr));gap:5px}
+.dot{aspect-ratio:1;max-width:100%;border:0;border-radius:4px;padding:0;cursor:pointer;transition:transform .12s}
+.dot:hover,.dot.on{transform:scale(1.25);box-shadow:0 0 0 2px var(--ink)}
+.info{min-height:3.2em;font-size:15px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:12px 14px;border-radius:8px;background:var(--green-soft)}
+
+/* Pasos */
+.steps{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.step{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+.step .k{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.step[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--on-accent)}
+.step[aria-pressed="true"] .k{color:var(--on-accent)}
+.arrow{color:var(--muted);font-family:var(--f-mono)}
+
+/* Variables */
+.vars{display:flex;flex-direction:column;gap:8px}
+.var{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center;padding:14px 16px}
+.var .t{font-size:14px;color:var(--muted)}
+.var .vn{font-weight:600;font-size:17px;line-height:1.3}
+@media (max-width:520px){.var{grid-template-columns:1fr;gap:2px}}
+
+/* Explorador */
+.filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.filters label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0;max-width:100%}
+.filters select,.filters input{font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);min-width:0;max-width:100%}
+.filters select#fProb{max-width:min(360px,100%)}
+.xscroll{overflow:auto;max-height:430px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14.5px}
+th{position:sticky;top:0;background:var(--surface);text-align:left;font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line)}
+td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tbody tr:hover{background:var(--green-soft)}
+
+/* Portada y cierre */
+.cover{gap:36px;padding-top:clamp(32px,9vh,96px)}
+.meta{display:flex;flex-direction:column;gap:4px;font-size:17px;color:var(--muted)}
+.meta strong{color:var(--ink);font-size:20px;font-weight:600}
+.hint{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.refs{display:flex;flex-direction:column;gap:14px;max-width:75ch}
+.refs p{padding-left:2.2em;text-indent:-2.2em;font-size:16px}
+.thanks{font-family:var(--f-display);font-weight:700;font-size:clamp(40px,6vw,72px);color:var(--sand-ink);line-height:1}
+</style>
+
+<div class="app">
+  <header class="bar">
+    <p class="brand"><b>Hallazgos OCI</b> · Proceso GAF · CORPOGUAJIRA</p>
+    <span class="count" id="count">1 / 11</span>
+    <button class="nav" id="prev" type="button" aria-label="Diapositiva anterior">←</button>
+    <button class="nav primary" id="next" type="button" aria-label="Diapositiva siguiente">→</button>
+    <button class="nav" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu">Índice</button>
+    <div class="menu" id="menu" hidden></div>
+    <span class="progress" id="progress"></span>
+  </header>
+
+  <main id="stage">
+
+    <!-- 1 Portada -->
+    <section class="slide cover" id="portada" data-title="Portada">
+      <p class="eyebrow">Proyecto de aplicación · Actividad 1</p>
+      <h1>Hallazgos de auditoría interna en la Gestión Administrativa y Financiera de CORPOGUAJIRA, 2018–2025</h1>
+      <div class="meta">
+        <strong>Miguel Ángel Gonzalo Pimienta Baleta</strong>
+        <span>Introducción a la Analítica de Datos y la Inteligencia Artificial · Docente: Lucas Adolfo Giraldo Ríos</span>
+        <span>Especialización en Inteligencia Artificial aplicada a la Analítica de Datos · Asturias Corporación Universitaria · 2026</span>
+      </div>
+      <div class="hint">
+        <button class="nav primary" type="button" data-go="next">Empezar la presentación →</button>
+        <p class="note">Avanza con las flechas del teclado, con los botones de arriba o deslizando en el celular. Toca las gráficas para ver el detalle.</p>
+      </div>
+    </section>
+
+    <!-- 2 Contexto -->
+    <section class="slide" id="contexto" data-title="El contexto" hidden>
+      <div class="head">
+        <p class="eyebrow">1 · Contexto</p>
+        <h2>El contexto seleccionado</h2>
+      </div>
+      <div class="cols-3">
+        <div class="card"><h3>Entidad</h3><p>CORPOGUAJIRA, Corporación Autónoma Regional de La Guajira, autoridad ambiental del departamento.</p></div>
+        <div class="card"><h3>Proceso</h3><p>Gestión Administrativa y Financiera (GAF): presupuesto, tesorería, contabilidad y cartera.</p></div>
+        <div class="card"><h3>Control</h3><p>La Oficina de Control Interno (OCI) audita el proceso y deja sus resultados en informes de auditoría.</p></div>
+      </div>
+      <div class="panel">
+        <p class="tap">Ruta de un hallazgo · toca cada paso</p>
+        <div class="steps" id="steps"></div>
+        <p id="stepInfo" aria-live="polite"></p>
+      </div>
+      <div class="mine"><span class="lab">Mi papel</span><p>Elegí este contexto porque corresponde a mi perfil profesional y a las funciones que desempeño actualmente. Estoy a cargo del Sistema de Gestión Integrado de la Secretaría General, que comprende las áreas Financiera, de Cartera, de Logística y de Gestión Documental.</p></div>
+    </section>
+
+    <!-- 3 Problema -->
+    <section class="slide" id="problema" data-title="El problema" hidden>
+      <div class="head">
+        <p class="eyebrow">2 · El problema</p>
+        <h2>El problema que se analiza</h2>
+      </div>
+      <div class="cols-3">
+        <div class="card"><span class="big" id="kTotal">83</span><p>hallazgos de auditoría interna</p></div>
+        <div class="card"><span class="big" id="kInf">11</span><p>informes de la OCI</p></div>
+        <div class="card"><span class="big" id="kYears">8</span><p>vigencias, de 2018 a 2025</p></div>
+      </div>
+      <div class="panel">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+          <p class="tap">Cada cuadro es un hallazgo · toca uno</p>
+          <div class="chips" role="group" aria-label="Colorear por">
+            <button class="chip" type="button" data-dotmode="plan" aria-pressed="true">Estado del plan</button>
+            <button class="chip" type="button" data-dotmode="year" aria-pressed="false">Vigencia</button>
+          </div>
+        </div>
+        <div class="dots" id="dots"></div>
+        <div class="legend" id="dotLegend"></div>
+        <div class="info" id="dotInfo" aria-live="polite">Pasa el cursor o toca un cuadro para ver el hallazgo.</div>
+      </div>
+      <div class="mine"><span class="lab">El problema</span><p>La entidad tiene hoy un rezago importante de hallazgos de auditoría. Contamos con grandes bases de datos de clientes, pagos, obligaciones presupuestales, cuentas de cobro y cuentas de pago, además de los registros históricos. Sin embargo, resulta difícil analizar esa información para plantear planes de mejoramiento que permitan solucionar los hallazgos.</p></div>
+    </section>
+
+    <!-- 4 Datos -->
+    <section class="slide" id="datos" data-title="Los datos" hidden>
+      <div class="head">
+        <p class="eyebrow">3 · Los datos</p>
+        <h2>Los datos utilizados</h2>
+        <p class="lead">Matriz de hallazgos de la OCI al proceso GAF, con corte al 19 de octubre de 2026: un registro por hallazgo.</p>
+      </div>
+      <div class="split">
+        <div class="vars" id="vars"></div>
+        <div class="panel" aria-live="polite">
+          <h3 id="varTitle">Distribución</h3>
+          <div class="scroll"><div class="hbars" id="varBars"></div></div>
+        </div>
+      </div>
+      <p class="note">Toca una variable para ver cómo se distribuyen sus valores.</p>
+    </section>
+
+    <!-- 5 Calidad -->
+    <section class="slide" id="calidad" data-title="La calidad de los datos" hidden>
+      <div class="head">
+        <p class="eyebrow">3 · Los datos</p>
+        <h2>La calidad de los datos</h2>
+      </div>
+      <div class="cols-4" id="qCards"></div>
+      <div class="panel" aria-live="polite">
+        <h3 id="qTitle"></h3>
+        <div class="scroll" id="qBody"></div>
+      </div>
+      <div class="mine"><span class="lab">Cómo lo abordo</span><p>Mi propuesta es filtrar los hallazgos repetidos que comparten una causa raíz similar y unificarlos en un mismo plan de mejoramiento, que luego se replica en los demás, en lugar de formular cinco o seis actividades distintas para un mismo problema. Las evidencias vacías corresponden a soportes que sí existen, pero que aún no se han cargado en la carpeta, porque los planes todavía no se han ejecutado ni cerrado. Hoy las verificaciones se hacen, en su mayoría, con los planes de mejoramiento que hemos venido implementando, cuyas evidencias se revisan cada trimestre, cuatrimestre o semestre.</p></div>
+    </section>
+
+    <!-- 6 Vigencias -->
+    <section class="slide" id="vigencias" data-title="Resultados: hallazgos por vigencia" hidden>
+      <div class="head">
+        <p class="eyebrow">4 · Resultados</p>
+        <h2>Hallazgos por vigencia auditada</h2>
+      </div>
+      <div class="split">
+        <div class="panel">
+          <p class="tap">Toca un año</p>
+          <div class="colchart" id="yearChart"></div>
+        </div>
+        <div class="panel" aria-live="polite" id="yearDetail"></div>
+      </div>
+      <div class="mine"><span class="lab">Lectura</span><p>La concentración de 25 hallazgos en 2023 puede deberse a varios factores, pero me indica que ese año posiblemente ocurrió una falla importante, originada en una causa externa al funcionamiento habitual del proceso. No corresponde a la normalidad: la entidad tiene muchos hallazgos, pero esa cifra responde a un hecho externo.</p></div>
+    </section>
+
+    <!-- 7 Planes -->
+    <section class="slide" id="planes" data-title="Resultados: estado de los planes" hidden>
+      <div class="head">
+        <p class="eyebrow">4 · Resultados</p>
+        <h2>Estado de los planes de mejoramiento</h2>
+      </div>
+      <div class="panel">
+        <div class="chips" id="planChips" role="group" aria-label="Filtrar por vigencia"></div>
+        <div class="stack" id="planStack" role="img"></div>
+        <div class="cols-3" id="planCards" aria-live="polite"></div>
+        <p class="note" id="planNote"></p>
+      </div>
+      <div class="mine"><span class="lab">Lectura</span><p>A su fecha de corte, la matriz registra 39 hallazgos sin plan formulado, pero hoy esa situación cambió: ya se formularon todos los planes y se están ejecutando. Lo que falta es el cierre. Algunos hallazgos ya se cerraron, pero la mayoría todavía no.</p></div>
+    </section>
+
+    <!-- 8 Repetidos -->
+    <section class="slide" id="repetidos" data-title="Resultados: problemas que se repiten" hidden>
+      <div class="head">
+        <p class="eyebrow">4 · Resultados</p>
+        <h2>Problemas que se repiten</h2>
+      </div>
+      <div class="split">
+        <div class="panel">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+            <p class="tap">Toca un problema</p>
+            <div class="chips" role="group" aria-label="Cuántos problemas mostrar">
+              <button class="chip" type="button" data-rep="6" aria-pressed="true">Los 6 más repetidos</button>
+              <button class="chip" type="button" data-rep="all" aria-pressed="false">Los 20</button>
+            </div>
+          </div>
+          <div class="hbars" id="repBars"></div>
+          <p class="note" id="repNote"></p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+          <div class="card"><span class="big sand" id="repBig">79 de 83</span><p id="repBigTxt"></p></div>
+          <div class="panel" aria-live="polite"><h3 id="repTitle"></h3><div class="scroll" id="repList"></div></div>
+        </div>
+      </div>
+      <div class="mine"><span class="lab">Lectura</span><p>Llegué hace poco a la Corporación, por lo que este trabajo no pudo hacerse antes. Los problemas se repiten porque, anteriormente, los hallazgos no se resolvían ni se seguía el debido proceso. Hoy, desde mi gestión, contribuyo a solucionarlos con planes de mejoramiento, mejora continua, gestión por procesos (BPM) y otras herramientas que he implementado para que no vuelvan a presentarse.</p></div>
+    </section>
+
+    <!-- 9 Explorador -->
+    <section class="slide" id="explorador" data-title="Explorador de hallazgos" hidden>
+      <div class="head">
+        <p class="eyebrow">4 · Resultados</p>
+        <h2>Explorador de los 83 hallazgos</h2>
+        <p class="lead">Una vista minable de la matriz: filtra por vigencia, estado del plan o problema, o busca un informe.</p>
+      </div>
+      <div class="filters">
+        <label for="fYear">Vigencia<select id="fYear"></select></label>
+        <label for="fPlan">Estado del plan<select id="fPlan"></select></label>
+        <label for="fProb">Problema que se repite<select id="fProb"></select></label>
+        <label for="fText">Buscar<input id="fText" type="search" placeholder="Ej.: PAI-012 o H4"></label>
+        <button class="nav" id="fReset" type="button">Quitar filtros</button>
+      </div>
+      <p class="note" id="fCount" aria-live="polite"></p>
+      <div class="xscroll">
+        <table>
+          <thead><tr><th>N.º</th><th>Vigencia</th><th>Informe</th><th>Hallazgo</th><th>Estado del plan</th><th>Problema que se repite</th></tr></thead>
+          <tbody id="fBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 10 Recomendación -->
+    <section class="slide" id="recomendacion" data-title="La recomendación" hidden>
+      <div class="head">
+        <p class="eyebrow">5 · Recomendación</p>
+        <h2>La recomendación</h2>
+      </div>
+      <div class="mine"><span class="lab">Recomendación</span><p>Recomiendo formular los planes de mejoramiento a partir de la causa raíz: identificar qué sucedió y por qué, aplicar primero una acción inmediata que la corrija y luego un plan de acción con el ciclo PHVA (planear, hacer, verificar y actuar) para evitar que el hallazgo se repita. Con la analítica de datos y la inteligencia artificial, este trabajo puede llevarse a gran escala y automatizarse, lo que permite tomar mejores decisiones.</p></div>
+      <div class="cols-3">
+        <div class="mine"><span class="lab">Acción</span><p>Identificar la causa raíz, aplicar una acción inmediata y formular un plan de acción con el ciclo PHVA.</p></div>
+        <div class="mine"><span class="lab">Responsable</span><p>El responsable del Sistema de Gestión Integrado de la Secretaría General.</p></div>
+        <div class="mine"><span class="lab">Indicador</span><p>Que los hallazgos no se vuelvan a presentar en las auditorías siguientes.</p></div>
+      </div>
+    </section>
+
+    <!-- 11 Fuentes -->
+    <section class="slide" id="fuentes" data-title="Referencias" hidden>
+      <div class="head">
+        <p class="eyebrow">Fuentes</p>
+        <h2>Referencias</h2>
+      </div>
+      <div class="refs">
+        <p>Asturias Corporación Universitaria. (s. f.). <i>Datos versus información</i> [Material de estudio, Unidad 1].</p>
+        <p>CORPOGUAJIRA. (2026). <i>Matriz de hallazgos de auditoría interna al proceso de Gestión Administrativa y Financiera, 2018–2025</i> [Documento de trabajo no publicado].</p>
+        <p>Wang, R. Y., y Strong, D. M. (1996). Beyond accuracy: What data quality means to data consumers. <i>Journal of Management Information Systems, 12</i>(4), 5–33. https://doi.org/10.1080/07421222.1996.11518099</p>
+      </div>
+      <p class="note">Los datos se muestran por códigos de informe y categorías; no incluyen la descripción de los hallazgos ni datos personales.</p>
+      <p class="thanks">Gracias</p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const D = [{"n":1,"v":2018,"inf":"PAI-010-2018","h":"H1","plan":"Plan de Choque","prob":"Pago de obligaciones y viáticos (AF-P-12)","ev":1,"pv":0,"may":0},{"n":2,"v":2018,"inf":"PAI-010-2018","h":"H2","plan":"Plan de Choque","prob":"Pago de obligaciones y viáticos (AF-P-12)","ev":1,"pv":1,"may":0},{"n":3,"v":2018,"inf":"PAI-010-2018","h":"H3","plan":"Plan de Choque","prob":"Pago de obligaciones y viáticos (AF-P-12)","ev":1,"pv":0,"may":0},{"n":4,"v":2018,"inf":"PAI-010-2018","h":"H5","plan":"Sin formular","prob":"Planes de mejoramiento (internos y con la CGR)","ev":1,"pv":0,"may":1},{"n":5,"v":2019,"inf":"PAI-013-2019","h":"H1","plan":"Plan de Choque","prob":"Sin repetición","ev":1,"pv":0,"may":0},{"n":6,"v":2019,"inf":"PAI-013-2019","h":"H2","plan":"Plan de Choque","prob":"Sin repetición","ev":1,"pv":0,"may":0},{"n":7,"v":2019,"inf":"PAI-013-2019","h":"H3","plan":"Plan de Choque","prob":"Sin repetición","ev":0,"pv":1,"may":0},{"n":8,"v":2019,"inf":"PAI-022-2019","h":"H1","plan":"Sin formular","prob":"Saldos e imputaciones contables sin depurar","ev":1,"pv":0,"may":0},{"n":9,"v":2019,"inf":"PAI-022-2019","h":"H2","plan":"Sin formular","prob":"Saldos e imputaciones contables sin depurar","ev":1,"pv":1,"may":0},{"n":10,"v":2019,"inf":"PAI-022-2019","h":"H3","plan":"Sin formular","prob":"Saldos e imputaciones contables sin depurar","ev":1,"pv":0,"may":0},{"n":11,"v":2019,"inf":"PAI-022-2019","h":"H4","plan":"Sin formular","prob":"Saldos e imputaciones contables sin depurar","ev":1,"pv":0,"may":0},{"n":12,"v":2019,"inf":"PAI-022-2019","h":"H5","plan":"Sin formular","prob":"Pago de obligaciones y viáticos (AF-P-12)","ev":1,"pv":0,"may":0},{"n":13,"v":2019,"inf":"PAI-022-2019","h":"H6","plan":"Sin formular","prob":"Saldos e imputaciones contables sin depurar","ev":1,"pv":0,"may":0},{"n":14,"v":2019,"inf":"PAI-022-2019","h":"H7","plan":"Sin formular","prob":"Saldos e imputaciones contables sin depurar","ev":1,"pv":0,"may":0},{"n":15,"v":2019,"inf":"PAI-022-2019","h":"H8","plan":"Sin formular","prob":"Saldos e imputaciones contables sin depurar","ev":1,"pv":1,"may":0},{"n":16,"v":2019,"inf":"PAI-022-2019","h":"H9","plan":"Sin formular","prob":"Devolución de la Estampilla Pro-Universidad","ev":1,"pv":1,"may":1},{"n":17,"v":2019,"inf":"PAI-022-2019","h":"H10","plan":"Sin formular","prob":"Devolución de la Estampilla Pro-Universidad","ev":1,"pv":1,"may":1},{"n":18,"v":2019,"inf":"PAI-022-2019","h":"H11","plan":"Plan de Choque","prob":"Devolución de la Estampilla Pro-Universidad","ev":1,"pv":1,"may":1},{"n":19,"v":2019,"inf":"PAI-022-2019","h":"H12","plan":"Sin formular","prob":"Devolución de la Estampilla Pro-Universidad","ev":1,"pv":0,"may":0},{"n":20,"v":2019,"inf":"PAI-022-2019","h":"H13","plan":"Sin formular","prob":"Notas a los estados financieros","ev":1,"pv":0,"may":0},{"n":21,"v":2019,"inf":"PAI-022-2019","h":"H14","plan":"Sin formular","prob":"Devolución de la Estampilla Pro-Universidad","ev":1,"pv":0,"may":0},{"n":22,"v":2020,"inf":"PAI-034-2020","h":"H1","plan":"Sin formular","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":0,"pv":0,"may":0},{"n":23,"v":2020,"inf":"PAI-034-2020","h":"H2","plan":"Sin formular","prob":"Saldos e imputaciones contables sin depurar","ev":1,"pv":0,"may":0},{"n":24,"v":2020,"inf":"PAI-034-2020","h":"H3","plan":"Sin formular","prob":"Notas a los estados financieros","ev":1,"pv":0,"may":0},{"n":25,"v":2020,"inf":"PAI-034-2020","h":"H4","plan":"Sin formular","prob":"Pago de obligaciones y viáticos (AF-P-12)","ev":1,"pv":0,"may":0},{"n":26,"v":2020,"inf":"PAI-034-2020","h":"H5","plan":"Sin formular","prob":"Descuentos de nómina y libranzas","ev":1,"pv":0,"may":0},{"n":27,"v":2021,"inf":"PAI-039-2021","h":"H1","plan":"Sin formular","prob":"Entrega de información a la OCI","ev":0,"pv":0,"may":0},{"n":28,"v":2021,"inf":"PAI-039-2021","h":"H2","plan":"Sin formular","prob":"Publicación de la información financiera en la web","ev":1,"pv":1,"may":0},{"n":29,"v":2021,"inf":"PAI-039-2021","h":"H3","plan":"Sin formular","prob":"Devolución de la Estampilla Pro-Universidad","ev":0,"pv":1,"may":0},{"n":30,"v":2021,"inf":"PAI-039-2021","h":"H4","plan":"Sin formular","prob":"Notas a los estados financieros","ev":1,"pv":0,"may":0},{"n":31,"v":2021,"inf":"PAI-039-2021","h":"H5","plan":"Sin formular","prob":"Boletines diarios de tesorería","ev":1,"pv":1,"may":0},{"n":31,"v":2021,"inf":"PAI-039-2021","h":"H6","plan":"Plan de Choque","prob":"Pagos y fuentes presupuestales","ev":1,"pv":1,"may":0},{"n":33,"v":2021,"inf":"PAI-039-2021","h":"H7","plan":"Plan de Choque","prob":"Registro cronológico de los hechos económicos","ev":1,"pv":0,"may":0},{"n":34,"v":2021,"inf":"PAI-039-2021","h":"H8","plan":"Plan de Choque","prob":"Pagos y fuentes presupuestales","ev":1,"pv":1,"may":0},{"n":35,"v":2021,"inf":"PAI-039-2021","h":"H9","plan":"Sin formular","prob":"PAC de recursos propios","ev":0,"pv":0,"may":0},{"n":36,"v":2022,"inf":"PAI-052-2022","h":"H1","plan":"Plan de Choque","prob":"Cajas menores","ev":0,"pv":0,"may":0},{"n":37,"v":2022,"inf":"PAI-052-2022","h":"H2","plan":"Plan de Choque","prob":"Cajas menores","ev":0,"pv":0,"may":0},{"n":38,"v":2023,"inf":"PAI-007-2023","h":"H1","plan":"Plan de Choque","prob":"Cajas menores","ev":0,"pv":0,"may":0},{"n":39,"v":2023,"inf":"PAI-007-2023","h":"H2","plan":"Plan de Choque","prob":"Planes de mejoramiento (internos y con la CGR)","ev":0,"pv":1,"may":0},{"n":40,"v":2023,"inf":"PAI-007-2023","h":"H3","plan":"Plan de Choque","prob":"Cajas menores","ev":1,"pv":0,"may":1},{"n":41,"v":2023,"inf":"PAI-007-2023","h":"H4","plan":"Plan de Choque","prob":"Cajas menores","ev":0,"pv":0,"may":0},{"n":42,"v":2023,"inf":"PAI-007-2023","h":"H5","plan":"Plan de Choque","prob":"Sin repetición","ev":0,"pv":1,"may":0},{"n":43,"v":2023,"inf":"PAI-007-2023","h":"H6","plan":"Plan de Choque","prob":"Cajas menores","ev":0,"pv":0,"may":0},{"n":44,"v":2023,"inf":"PAI-007-2023","h":"H7","plan":"Plan de Choque","prob":"Procedimientos desactualizados","ev":1,"pv":0,"may":0},{"n":45,"v":2023,"inf":"PAI-012-2023","h":"H1","plan":"Plan de Choque","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":1,"pv":0,"may":0},{"n":46,"v":2023,"inf":"PAI-012-2023","h":"H2","plan":"Sin formular","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":1,"pv":1,"may":0},{"n":47,"v":2023,"inf":"PAI-012-2023","h":"H3","plan":"Sin formular","prob":"Procedimientos desactualizados","ev":1,"pv":0,"may":0},{"n":48,"v":2023,"inf":"PAI-012-2023","h":"H4","plan":"Sin formular","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":1,"pv":1,"may":0},{"n":49,"v":2023,"inf":"PAI-012-2023","h":"H5","plan":"Sin formular","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":1,"pv":0,"may":0},{"n":50,"v":2023,"inf":"PAI-012-2023","h":"H6","plan":"Sin formular","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":1,"pv":0,"may":0},{"n":51,"v":2023,"inf":"PAI-012-2023","h":"H7","plan":"Plan de Choque","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":0,"pv":0,"may":0},{"n":52,"v":2023,"inf":"PAI-012-2023","h":"H8","plan":"Plan de Choque","prob":"Planes de mejoramiento (internos y con la CGR)","ev":0,"pv":0,"may":0},{"n":53,"v":2023,"inf":"PAI-012-2023","h":"H9","plan":"Plan de Choque","prob":"Deterioro de cartera y Manual de Políticas Contables","ev":0,"pv":0,"may":0},{"n":54,"v":2023,"inf":"PAI-012-2023","h":"H10","plan":"Sin formular","prob":"Deterioro de cartera y Manual de Políticas Contables","ev":0,"pv":0,"may":0},{"n":55,"v":2023,"inf":"PAI-012-2023","h":"H11","plan":"Plan de Choque","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":1,"pv":0,"may":0},{"n":56,"v":2023,"inf":"PAI-012-2023","h":"H12","plan":"Plan de Choque","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":0,"pv":0,"may":0},{"n":57,"v":2023,"inf":"PAI-012-2023","h":"H13","plan":"Sin formular","prob":"Cartera de la TUA, cobro y títulos ejecutivos","ev":1,"pv":0,"may":0},{"n":58,"v":2023,"inf":"PAI-013-2023","h":"H1","plan":"Plan de Choque","prob":"Entrega de información a la OCI","ev":0,"pv":0,"may":0},{"n":59,"v":2023,"inf":"PAI-013-2023","h":"H2","plan":"Plan de Choque","prob":"Conciliaciones bancarias, cuentas bancarias y partidas sin identificar","ev":1,"pv":1,"may":0},{"n":60,"v":2023,"inf":"PAI-013-2023","h":"H3","plan":"Sin formular","prob":"Boletines diarios de tesorería","ev":1,"pv":0,"may":0},{"n":61,"v":2023,"inf":"PAI-013-2023","h":"H4","plan":"Plan de Choque","prob":"Depósitos y títulos judiciales","ev":1,"pv":0,"may":0},{"n":62,"v":2023,"inf":"PAI-013-2023","h":"H5","plan":"Sin formular","prob":"Descuentos de nómina y libranzas","ev":1,"pv":0,"may":0},{"n":63,"v":2024,"inf":"PAI-010-2024","h":"H1","plan":"Sin formular","prob":"Inmuebles y propiedades, planta y equipo","ev":1,"pv":1,"may":0},{"n":64,"v":2024,"inf":"PAI-010-2024","h":"H2","plan":"Plan de Choque","prob":"Registro cronológico de los hechos económicos","ev":1,"pv":0,"may":0},{"n":65,"v":2024,"inf":"PAI-010-2024","h":"H3","plan":"Sin formular","prob":"Saldos e imputaciones contables sin depurar","ev":1,"pv":0,"may":0},{"n":66,"v":2024,"inf":"PAI-010-2024","h":"H4","plan":"Sin formular","prob":"Notas a los estados financieros","ev":1,"pv":0,"may":0},{"n":67,"v":2024,"inf":"PAI-010-2024","h":"H5","plan":"Sin formular","prob":"Boletines diarios de tesorería","ev":1,"pv":0,"may":0},{"n":68,"v":2024,"inf":"PAI-010-2024","h":"H6","plan":"Plan de Choque","prob":"Planes de mejoramiento (internos y con la CGR)","ev":0,"pv":1,"may":0},{"n":69,"v":2024,"inf":"PAI-010-2024","h":"H7","plan":"Plan de Choque","prob":"Procedimientos desactualizados","ev":0,"pv":0,"may":0},{"n":70,"v":2024,"inf":"PAI-010-2024","h":"H8","plan":"Plan de Choque","prob":"PAC de recursos propios","ev":0,"pv":0,"may":0},{"n":71,"v":2024,"inf":"PAI-010-2024","h":"H9","plan":"Plan de Choque","prob":"Conciliaciones bancarias, cuentas bancarias y partidas sin identificar","ev":1,"pv":1,"may":0},{"n":72,"v":2024,"inf":"PAI-010-2024","h":"H10","plan":"Plan de Choque","prob":"Comunicación entre las áreas","ev":0,"pv":0,"may":0},{"n":73,"v":2024,"inf":"PAI-010-2024","h":"H11","plan":"Plan de Choque","prob":"Conciliaciones bancarias, cuentas bancarias y partidas sin identificar","ev":1,"pv":1,"may":0},{"n":74,"v":2024,"inf":"PAI-010-2024","h":"H12","plan":"Plan de Choque","prob":"Pagos y fuentes presupuestales","ev":1,"pv":1,"may":0},{"n":75,"v":2024,"inf":"PAI-010-2024","h":"H13","plan":"Sin formular","prob":"Pagos y fuentes presupuestales","ev":1,"pv":0,"may":0},{"n":76,"v":2025,"inf":"PAI-015-2025","h":"H1","plan":"R CGP05-1 (2026)","prob":"Conciliaciones bancarias, cuentas bancarias y partidas sin identificar","ev":1,"pv":1,"may":0},{"n":77,"v":2025,"inf":"PAI-015-2025","h":"H2","plan":"R CGP05-1 (2026)","prob":"PAC de recursos propios","ev":0,"pv":0,"may":0},{"n":78,"v":2025,"inf":"PAI-015-2025","h":"H3","plan":"R CGP05-1 (2026)","prob":"Cajas menores","ev":0,"pv":0,"may":0},{"n":79,"v":2025,"inf":"PAI-015-2025","h":"H4","plan":"R CGP05-1 (2026)","prob":"Cajas menores","ev":0,"pv":0,"may":0},{"n":80,"v":2025,"inf":"PAI-015-2025","h":"H5","plan":"R CGP05-1 (2026)","prob":"Cajas menores","ev":0,"pv":0,"may":0},{"n":81,"v":2025,"inf":"PAI-015-2025","h":"H6","plan":"R CGP05-1 (2026)","prob":"Cajas menores","ev":0,"pv":1,"may":0},{"n":82,"v":2025,"inf":"PAI-015-2025","h":"H7","plan":"R CGP05-1 (2026)","prob":"Conciliaciones bancarias, cuentas bancarias y partidas sin identificar","ev":0,"pv":1,"may":0},{"n":83,"v":2025,"inf":"PAI-015-2025","h":"H8","plan":"R CGP05-1 (2026)","prob":"Conciliaciones bancarias, cuentas bancarias y partidas sin identificar","ev":0,"pv":1,"may":0}];
+
+(function(){
+  const $ = (s, el) => (el || document).querySelector(s);
+  const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const TOTAL = D.length;
+  const pct = (n, t) => Math.round(n * 100 / (t || TOTAL)) + ' %';
+  const YEARS = Array.from(new Set(D.map(d => d.v))).sort((a, b) => a - b);
+  const INFS = Array.from(new Set(D.map(d => d.inf)));
+  const PLANS = ['Sin formular', 'Plan de Choque', 'R CGP05-1 (2026)'];
+  const PLAN_TXT = {'Sin formular':'Sin plan formulado', 'Plan de Choque':'Plan de Choque', 'R CGP05-1 (2026)':'Plan R CGP05-1 (2026)'};
+  const PLAN_VAR = {'Sin formular':'var(--sand)', 'Plan de Choque':'var(--green)', 'R CGP05-1 (2026)':'var(--blue)'};
+  const SIN = 'Sin repetición';
+
+  function tally(rows, key){
+    const m = new Map();
+    rows.forEach(r => { const k = typeof key === 'function' ? key(r) : r[key]; m.set(k, (m.get(k) || 0) + 1); });
+    return m;
+  }
+  const byCount = m => Array.from(m.entries()).sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0]), 'es'));
+  const pill = p => '<span class="pill" style="--c:' + PLAN_VAR[p] + '">' + esc(PLAN_TXT[p]) + '</span>';
+  function hbars(entries, opts){
+    opts = opts || {};
+    const max = Math.max.apply(null, entries.map(e => e[1]).concat([1]));
+    return entries.map(([k, n]) => {
+      const tag = opts.button ? 'button' : 'div';
+      const attrs = opts.button ? ' type="button" data-k="' + esc(k) + '" aria-pressed="' + (k === opts.selected) + '"' : '';
+      return '<' + tag + ' class="hrow"' + attrs + '><span class="hl">' + esc(k) + '</span><span class="track"><span class="hb" style="width:' + (n / max * 100).toFixed(1) + '%"></span></span><span class="hn">' + n + '</span></' + tag + '>';
+    }).join('');
+  }
+  const rlist = rows => '<ul class="rlist">' + rows.map(r => '<li><span class="code">N.º ' + r.n + ' · ' + esc(r.inf) + ' ' + esc(r.h) + '</span><span class="meta">Vigencia ' + r.v + '</span>' + pill(r.plan) + '</li>').join('') + '</ul>';
+  function press(group, el){ group.forEach(b => b.setAttribute('aria-pressed', String(b === el))); }
+
+  /* ---------- Navegación ---------- */
+  const slides = $$('.slide');
+  const stage = $('#stage');
+  const menu = $('#menu');
+  let cur = -1;
+  menu.innerHTML = slides.map((s, i) => '<button type="button" data-i="' + i + '"><span class="k">' + (i + 1) + '</span><span>' + esc(s.dataset.title) + '</span></button>').join('');
+  function go(i, fromHash){
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    if (i === cur) return;
+    slides.forEach((s, k) => { s.hidden = k !== i; });
+    cur = i;
+    $('#count').textContent = (i + 1) + ' / ' + slides.length;
+    $('#progress').style.width = ((i + 1) / slides.length * 100) + '%';
+    $('#prev').disabled = i === 0;
+    $('#next').disabled = i === slides.length - 1;
+    $$('button', menu).forEach((b, k) => b.setAttribute('aria-current', String(k === i)));
+    stage.scrollTop = 0;
+    const id = slides[i].id;
+    if (!fromHash && location.hash.slice(1) !== id) location.hash = id;
+  }
+  function closeMenu(){ menu.hidden = true; $('#menuBtn').setAttribute('aria-expanded', 'false'); }
+  $('#prev').addEventListener('click', () => go(cur - 1));
+  $('#next').addEventListener('click', () => go(cur + 1));
+  $$('[data-go="next"]').forEach(b => b.addEventListener('click', () => go(cur + 1)));
+  $('#menuBtn').addEventListener('click', () => { const open = menu.hidden; menu.hidden = !open; $('#menuBtn').setAttribute('aria-expanded', String(open)); });
+  menu.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { go(+b.dataset.i); closeMenu(); } });
+  document.addEventListener('click', e => { if (!menu.hidden && !e.target.closest('#menu, #menuBtn')) closeMenu(); });
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input, select, textarea')) return;
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { go(cur + 1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(cur - 1); e.preventDefault(); }
+    else if (e.key === 'Escape') closeMenu();
+  });
+  let tx = null, ty = null;
+  stage.addEventListener('touchstart', e => {
+    if (e.target.closest('.xscroll, .scroll, .dots')) { tx = null; return; }
+    const t = e.changedTouches[0]; tx = t.clientX; ty = t.clientY;
+  }, {passive: true});
+  stage.addEventListener('touchend', e => {
+    if (tx === null) return;
+    const t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+    if (Math.abs(dx) > 70 && Math.abs(dy) < 50) go(cur + (dx < 0 ? 1 : -1));
+    tx = null;
+  }, {passive: true});
+  window.addEventListener('hashchange', () => {
+    const i = slides.findIndex(s => s.id === location.hash.slice(1));
+    if (i >= 0) go(i, true);
+  });
+
+  /* ---------- 2 Contexto: ruta del hallazgo ---------- */
+  const STEPS = [
+    ['Auditoría', 'La OCI audita el proceso y deja sus resultados en un informe con código propio, por ejemplo PAI-039-2021.'],
+    ['Hallazgo', 'Cada debilidad encontrada queda como un hallazgo numerado dentro del informe: H1, H2, H3…'],
+    ['Plan de mejoramiento', 'El proceso formula acciones para corregir la causa del hallazgo, en el formato R CGP05-1.'],
+    ['Seguimiento', 'La OCI revisa el avance de las acciones y la evidencia que las respalda.'],
+    ['Cierre', 'El hallazgo se cierra cuando las acciones se cumplen y resultan eficaces.']
+  ];
+  const stepsEl = $('#steps');
+  stepsEl.innerHTML = STEPS.map((s, i) => (i ? '<span class="arrow" aria-hidden="true">→</span>' : '') + '<button class="step" type="button" data-i="' + i + '" aria-pressed="' + (i === 0) + '"><span class="k">' + (i + 1) + '</span>' + esc(s[0]) + '</button>').join('');
+  const stepBtns = $$('.step', stepsEl);
+  function showStep(i){ press(stepBtns, stepBtns[i]); $('#stepInfo').textContent = STEPS[i][1]; }
+  stepsEl.addEventListener('click', e => { const b = e.target.closest('.step'); if (b) showStep(+b.dataset.i); });
+  showStep(0);
+
+  /* ---------- 3 Problema: un cuadro por hallazgo ---------- */
+  $('#kTotal').textContent = TOTAL;
+  $('#kInf').textContent = INFS.length;
+  $('#kYears').textContent = YEARS.length;
+  const sorted = D.slice().sort((a, b) => a.v - b.v || a.inf.localeCompare(b.inf) || a.n - b.n || a.h.localeCompare(b.h));
+  const yearShade = y => 'color-mix(in srgb, var(--green) ' + (30 + (y - YEARS[0]) * 10) + '%, var(--bg))';
+  let dotMode = 'plan';
+  const dotsEl = $('#dots');
+  function renderDots(){
+    dotsEl.innerHTML = sorted.map((d, i) => '<button class="dot" type="button" data-i="' + i + '" style="background:' + (dotMode === 'plan' ? PLAN_VAR[d.plan] : yearShade(d.v)) + '" aria-label="' + esc(d.inf + ' ' + d.h + ', vigencia ' + d.v + ', ' + PLAN_TXT[d.plan]) + '"></button>').join('');
+    const leg = dotMode === 'plan'
+      ? PLANS.map(p => { const n = D.filter(d => d.plan === p).length; return '<span><span class="sw" style="background:' + PLAN_VAR[p] + '"></span>' + esc(PLAN_TXT[p]) + ': ' + n + '</span>'; })
+      : YEARS.map(y => '<span><span class="sw" style="background:' + yearShade(y) + '"></span>' + y + '</span>');
+    $('#dotLegend').innerHTML = leg.join('');
+  }
+  function dotInfo(e){
+    const b = e.target.closest('.dot'); if (!b) return;
+    const d = sorted[+b.dataset.i];
+    $$('.dot', dotsEl).forEach(x => x.classList.toggle('on', x === b));
+    $('#dotInfo').innerHTML = '<span class="code">' + esc(d.inf) + ' ' + esc(d.h) + '</span><span>Vigencia ' + d.v + '</span>' + pill(d.plan) + '<span>' + esc(d.prob) + '</span>';
+  }
+  dotsEl.addEventListener('mouseover', dotInfo);
+  dotsEl.addEventListener('focusin', dotInfo);
+  dotsEl.addEventListener('click', dotInfo);
+  const modeBtns = $$('[data-dotmode]');
+  modeBtns.forEach(b => b.addEventListener('click', () => { dotMode = b.dataset.dotmode; press(modeBtns, b); renderDots(); }));
+  renderDots();
+
+  /* ---------- 4 Datos: variables ---------- */
+  const VARS = [
+    {name:'Vigencia', tipo:'Numérica discreta', val:'2018 a 2025', dist:() => YEARS.map(y => [String(y), D.filter(d => d.v === y).length])},
+    {name:'Informe de auditoría', tipo:'Categórica nominal', val:INFS.length + ' informes', dist:() => byCount(tally(D, 'inf'))},
+    {name:'Estado del plan de mejoramiento', tipo:'Categórica nominal', val:'3 estados', dist:() => PLANS.map(p => [PLAN_TXT[p], D.filter(d => d.plan === p).length])},
+    {name:'Problema que se repite', tipo:'Categórica nominal', val:'20 problemas y «sin repetición»', dist:() => byCount(tally(D, 'prob'))}
+  ];
+  const varsEl = $('#vars');
+  varsEl.innerHTML = VARS.map((v, i) => '<button class="card pick var" type="button" data-i="' + i + '" aria-pressed="' + (i === 0) + '"><span class="vn">' + esc(v.name) + '</span><span class="t">' + esc(v.tipo) + '</span><span class="t">' + esc(v.val) + '</span></button>').join('');
+  const varBtns = $$('.var', varsEl);
+  function showVar(i){ press(varBtns, varBtns[i]); $('#varTitle').textContent = 'Distribución: ' + VARS[i].name; $('#varBars').innerHTML = hbars(VARS[i].dist()); }
+  varsEl.addEventListener('click', e => { const b = e.target.closest('.var'); if (b) showVar(+b.dataset.i); });
+  showVar(0);
+
+  /* ---------- 5 Calidad ---------- */
+  const nums = tally(D, 'n');
+  const dupN = Array.from(nums.entries()).filter(e => e[1] > 1).map(e => e[0]);
+  const maxN = Math.max.apply(null, D.map(d => d.n));
+  const missingN = []; for (let k = 1; k <= maxN; k++) if (!nums.has(k)) missingN.push(k);
+  const QUAL = [
+    {big:String(dupN.length), txt:'número de registro repetido: el N.º ' + dupN.join(', ') + ' aparece dos veces y el N.º ' + missingN.join(', ') + ' no existe.',
+     title:'Registros con el N.º ' + dupN.join(', '), body:() => rlist(D.filter(d => dupN.indexOf(d.n) >= 0))},
+    {big:String(D.filter(d => !d.ev).length), txt:'hallazgos sin evidencia descrita en la columna «Evidencia».',
+     title:'Hallazgos sin evidencia descrita, por informe', body:() => '<div class="hbars">' + hbars(byCount(tally(D.filter(d => !d.ev), 'inf'))) + '</div>'},
+    {big:String(D.filter(d => d.pv).length), txt:'hallazgos con una verificación pendiente en la columna «Por verificar».',
+     title:'Hallazgos con verificación pendiente, por informe', body:() => '<div class="hbars">' + hbars(byCount(tally(D.filter(d => d.pv), 'inf'))) + '</div>'},
+    {big:String(D.filter(d => d.may).length), txt:'textos de «Evidencia» escritos en mayúsculas sostenidas; hay además errores de digitación.',
+     title:'Textos en mayúsculas sostenidas', body:() => rlist(D.filter(d => d.may))}
+  ];
+  const qEl = $('#qCards');
+  qEl.innerHTML = QUAL.map((q, i) => '<button class="card pick" type="button" data-i="' + i + '" aria-pressed="' + (i === 0) + '"><span class="big sand">' + q.big + '</span><span>' + esc(q.txt) + '</span><span class="tap">Ver casos</span></button>').join('');
+  const qBtns = $$('.pick', qEl);
+  function showQ(i){ press(qBtns, qBtns[i]); $('#qTitle').textContent = QUAL[i].title; $('#qBody').innerHTML = QUAL[i].body(); }
+  qEl.addEventListener('click', e => { const b = e.target.closest('.pick'); if (b) showQ(+b.dataset.i); });
+  showQ(0);
+
+  /* ---------- 6 Vigencias ---------- */
+  const yCount = YEARS.map(y => D.filter(d => d.v === y).length);
+  const yMax = Math.max.apply(null, yCount);
+  const yChart = $('#yearChart');
+  yChart.innerHTML = YEARS.map((y, i) => '<button class="col" type="button" data-y="' + y + '" aria-pressed="false" aria-label="' + y + ': ' + yCount[i] + ' hallazgos"><span class="v">' + yCount[i] + '</span><span class="b" style="height:' + Math.round(yCount[i] / yMax * 240) + 'px"></span><span class="y">' + y + '</span></button>').join('');
+  const colBtns = $$('.col', yChart);
+  function stackHTML(rows){
+    return '<div class="stack" style="height:28px">' + PLANS.map(p => { const n = rows.filter(d => d.plan === p).length; return n ? '<span class="seg" style="flex-grow:' + n + ';background:' + PLAN_VAR[p] + '"></span>' : ''; }).join('') + '</div>';
+  }
+  function showYear(y){
+    press(colBtns, colBtns[YEARS.indexOf(y)]);
+    const rows = D.filter(d => d.v === y);
+    const infs = byCount(tally(rows, 'inf'));
+    $('#yearDetail').innerHTML =
+      '<p class="tap">Vigencia ' + y + '</p>' +
+      '<span class="big sand">' + rows.length + ' de ' + TOTAL + '</span>' +
+      '<p>hallazgos (' + pct(rows.length) + ' del total)' + (rows.length === yMax ? ', el año con más hallazgos.' : '.') + '</p>' +
+      '<h3>Estado del plan</h3>' + stackHTML(rows) +
+      '<div class="legend">' + PLANS.map(p => { const n = rows.filter(d => d.plan === p).length; return n ? '<span><span class="sw" style="background:' + PLAN_VAR[p] + '"></span>' + esc(PLAN_TXT[p]) + ': ' + n + '</span>' : ''; }).join('') + '</div>' +
+      '<h3>Informes de esa vigencia</h3>' +
+      '<ul class="rlist">' + infs.map(e => '<li><span class="code">' + esc(e[0]) + '</span><span class="meta">' + e[1] + (e[1] === 1 ? ' hallazgo' : ' hallazgos') + '</span></li>').join('') + '</ul>';
+  }
+  yChart.addEventListener('click', e => { const b = e.target.closest('.col'); if (b) showYear(+b.dataset.y); });
+  showYear(YEARS[yCount.indexOf(yMax)]);
+
+  /* ---------- 7 Planes ---------- */
+  const chipsEl = $('#planChips');
+  chipsEl.innerHTML = ['Todas'].concat(YEARS).map((y, i) => '<button class="chip" type="button" data-y="' + y + '" aria-pressed="' + (i === 0) + '">' + y + '</button>').join('');
+  const planChips = $$('.chip', chipsEl);
+  function showPlans(y){
+    const rows = y === 'Todas' ? D : D.filter(d => d.v === +y);
+    press(planChips, planChips.find(c => c.dataset.y === String(y)));
+    $('#planStack').innerHTML = PLANS.map(p => { const n = rows.filter(d => d.plan === p).length; return n ? '<span class="seg" style="flex-grow:' + n + ';background:' + PLAN_VAR[p] + '"></span>' : ''; }).join('');
+    $('#planStack').setAttribute('aria-label', PLANS.map(p => PLAN_TXT[p] + ': ' + rows.filter(d => d.plan === p).length).join(', '));
+    $('#planCards').innerHTML = PLANS.map(p => {
+      const n = rows.filter(d => d.plan === p).length;
+      return '<div class="card" style="border-top:6px solid ' + PLAN_VAR[p] + '"><span class="big' + (p === 'Sin formular' ? ' sand' : '') + '">' + n + ' · ' + pct(n, rows.length) + '</span><p>' + esc(PLAN_TXT[p]) + '</p></div>';
+    }).join('');
+    $('#planNote').textContent = (y === 'Todas' ? 'Todas las vigencias' : 'Vigencia ' + y) + ': ' + rows.length + ' hallazgos. Toca un año para filtrar.';
+  }
+  chipsEl.addEventListener('click', e => { const b = e.target.closest('.chip'); if (b) showPlans(b.dataset.y); });
+  showPlans('Todas');
+
+  /* ---------- 8 Repetidos ---------- */
+  const repRows = D.filter(d => d.prob !== SIN);
+  const repAll = byCount(tally(repRows, 'prob'));
+  $('#repBig').textContent = repRows.length + ' de ' + TOTAL;
+  $('#repBigTxt').textContent = 'hallazgos (' + pct(repRows.length) + ') repiten alguno de ' + repAll.length + ' problemas.';
+  let repMode = '6', repSel = repAll[0][0];
+  const repBars = $('#repBars');
+  function renderRep(){
+    const list = repMode === '6' ? repAll.slice(0, 6) : repAll;
+    repBars.innerHTML = hbars(list, {button: true, selected: repSel});
+    const rest = repAll.slice(6), restN = rest.reduce((s, e) => s + e[1], 0), sinN = D.length - repRows.length;
+    $('#repNote').textContent = repMode === '6'
+      ? 'Otros ' + rest.length + ' problemas: ' + restN + ' hallazgos · Sin repetición: ' + sinN + ' hallazgos.'
+      : 'Sin repetición: ' + sinN + ' hallazgos.';
+    const rows = D.filter(d => d.prob === repSel);
+    $('#repTitle').textContent = repSel + ' (' + rows.length + ')';
+    $('#repList').innerHTML = rlist(rows);
+  }
+  repBars.addEventListener('click', e => { const b = e.target.closest('.hrow'); if (b) { repSel = b.dataset.k; renderRep(); } });
+  const repBtns = $$('[data-rep]');
+  repBtns.forEach(b => b.addEventListener('click', () => {
+    repMode = b.dataset.rep; press(repBtns, b);
+    if (repMode === '6' && repAll.slice(0, 6).every(e => e[0] !== repSel)) repSel = repAll[0][0];
+    renderRep();
+  }));
+  renderRep();
+
+  /* ---------- 9 Explorador ---------- */
+  const fYear = $('#fYear'), fPlan = $('#fPlan'), fProb = $('#fProb'), fText = $('#fText');
+  const opt = (v, t) => '<option value="' + esc(v) + '">' + esc(t) + '</option>';
+  fYear.innerHTML = opt('', 'Todas') + YEARS.map(y => opt(y, y)).join('');
+  fPlan.innerHTML = opt('', 'Todos') + PLANS.map(p => opt(p, PLAN_TXT[p])).join('');
+  fProb.innerHTML = opt('', 'Todos') + byCount(tally(D, 'prob')).map(e => opt(e[0], e[0] + ' (' + e[1] + ')')).join('');
+  function renderTable(){
+    const q = fText.value.trim().toLowerCase();
+    const rows = D.filter(d =>
+      (!fYear.value || d.v === +fYear.value) &&
+      (!fPlan.value || d.plan === fPlan.value) &&
+      (!fProb.value || d.prob === fProb.value) &&
+      (!q || (d.inf + ' ' + d.h + ' ' + d.prob).toLowerCase().indexOf(q) >= 0));
+    $('#fBody').innerHTML = rows.map(d => '<tr><td class="num">' + d.n + '</td><td class="num">' + d.v + '</td><td><span class="code">' + esc(d.inf) + '</span></td><td class="num">' + esc(d.h) + '</td><td>' + pill(d.plan) + '</td><td>' + esc(d.prob) + '</td></tr>').join('')
+      || '<tr><td colspan="6">Ningún hallazgo cumple esos filtros. Usa «Quitar filtros» para ver los 83.</td></tr>';
+    $('#fCount').textContent = 'Mostrando ' + rows.length + ' de ' + TOTAL + ' hallazgos.';
+  }
+  [fYear, fPlan, fProb].forEach(el => el.addEventListener('change', renderTable));
+  fText.addEventListener('input', renderTable);
+  $('#fReset').addEventListener('click', () => { fYear.value = ''; fPlan.value = ''; fProb.value = ''; fText.value = ''; renderTable(); });
+  renderTable();
+
+  /* ---------- Inicio ---------- */
+  const start = slides.findIndex(s => s.id === location.hash.slice(1));
+  go(start >= 0 ? start : 0, true);
+})();
+</script>
+
+</body>
+</html>
